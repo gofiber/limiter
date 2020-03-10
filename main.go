@@ -4,6 +4,13 @@
 
 package limiter
 
+import (
+	"strconv"
+	"time"
+
+	"github.com/gofiber/fiber"
+)
+
 // Config ...
 type Config struct {
 	Skip func(*fiber.Ctx) bool
