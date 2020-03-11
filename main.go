@@ -13,7 +13,9 @@ import (
 
 // Config ...
 type Config struct {
-	Skip func(*fiber.Ctx) bool
+	// Filter defines a function to skip middleware.
+	// Optional. Default: nil
+	Filter func(*fiber.Ctx) bool
 	// Timeout in seconds on how long to keep records of requests in memory
 	// Default: 60
 	Timeout int
@@ -95,8 +97,8 @@ func New(config ...Config) func(*fiber.Ctx) {
 		}
 	}()
 	return func(c *fiber.Ctx) {
-		// Skip middleware if Skip returns true
-		if cfg.Skip != nil && cfg.Skip(c) {
+		// Filter request to skip middleware
+		if cfg.Filter != nil && cfg.Filter(c) {
 			c.Next()
 			return
 		}
