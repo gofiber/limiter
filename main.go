@@ -117,7 +117,7 @@ func New(config ...Config) func(*fiber.Ctx) {
 		// Calculate when it resets in seconds
 		resetTime := reset[key] - timestamp
 		// Check if hits exceed the cfg.Max
-		if remaining < 1 {
+		if remaining < 0 {
 			// Call Handler func
 			cfg.Handler(c)
 			// Return response with Retry-After header
