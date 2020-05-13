@@ -70,8 +70,8 @@ func New(config ...Config) func(*fiber.Ctx) {
 		}
 	}
 	// Limiter settings
-	var hits = map[string]int{}
-	var reset = map[string]int{}
+	var hits = make(map[string]int)
+	var reset = make(map[string]int)
 	var timestamp = int(time.Now().Unix())
 	// Update timestamp every second
 	go func() {
