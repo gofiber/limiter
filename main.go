@@ -6,6 +6,7 @@ package limiter
 
 import (
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/gofiber/fiber"
@@ -42,6 +43,8 @@ type Config struct {
 
 // New ...
 func New(config ...Config) func(*fiber.Ctx) {
+	// mutex for parallel read and write access
+	mux := &sync.Mutex{}
 	// Init config
 	var cfg Config
 	if len(config) > 0 {
@@ -88,8 +91,10 @@ func New(config ...Config) func(*fiber.Ctx) {
 				// If resetTime exist and current time is equal or bigger
 				if reset[key] != 0 && timestamp >= reset[key] {
 					// Reset hits and resetTime
+					mux.Lock()
 					hits[key] = 0
 					reset[key] = 0
+					mux.Unlock()
 				}
 			}
 			// Wait cfg.Timeout
@@ -104,6 +109,7 @@ func New(config ...Config) func(*fiber.Ctx) {
 		}
 		// Get key (default is the remote IP)
 		key := cfg.Key(c)
+		mux.Lock()
 		// Increment key hits
 		hits[key]++
 		// Set unix timestamp if not exist
@@ -112,10 +118,11 @@ func New(config ...Config) func(*fiber.Ctx) {
 		}
 		// Get current hits
 		hitCount := hits[key]
-		// Set how many hits we have left
-		remaining := cfg.Max - hitCount
 		// Calculate when it resets in seconds
 		resetTime := reset[key] - timestamp
+		mux.Unlock()
+		// Set how many hits we have left
+		remaining := cfg.Max - hitCount
 		// Check if hits exceed the cfg.Max
 		if remaining < 0 {
 			// Call Handler func
