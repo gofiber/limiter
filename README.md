@@ -1,5 +1,7 @@
 # Limiter
 
+![Release](https://img.shields.io/github/release/gofiber/limiter.svg)
+[![Discord](https://img.shields.io/badge/discord-join%20channel-7289DA)](https://gofiber.io/discord)
 ![Test](https://github.com/gofiber/limiter/workflows/Test/badge.svg)
 ![Security](https://github.com/gofiber/limiter/workflows/Security/badge.svg)
 ![Linter](https://github.com/gofiber/limiter/workflows/Linter/badge.svg)
