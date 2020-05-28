@@ -1,3 +1,9 @@
+# Limiter
+
+![Test](https://github.com/gofiber/limiter/workflows/Test/badge.svg)
+![Security](https://github.com/gofiber/limiter/workflows/Security/badge.svg)
+![Linter](https://github.com/gofiber/limiter/workflows/Linter/badge.svg)
+
 ### Install
 ```
 go get -u github.com/gofiber/fiber
