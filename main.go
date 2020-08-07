@@ -83,24 +83,6 @@ func New(config ...Config) func(*fiber.Ctx) {
 			time.Sleep(1 * time.Second)
 		}
 	}()
-	// Reset hits every cfg.Timeout
-	go func() {
-		for {
-			// For every key in reset
-			for key := range reset {
-				// If resetTime exist and current time is equal or bigger
-				if reset[key] != 0 && timestamp >= reset[key] {
-					// Reset hits and resetTime
-					mux.Lock()
-					hits[key] = 0
-					reset[key] = 0
-					mux.Unlock()
-				}
-			}
-			// Wait cfg.Timeout
-			time.Sleep(time.Duration(cfg.Timeout) * time.Second)
-		}
-	}()
 	return func(c *fiber.Ctx) {
 		// Filter request to skip middleware
 		if cfg.Filter != nil && cfg.Filter(c) {
@@ -115,6 +97,13 @@ func New(config ...Config) func(*fiber.Ctx) {
 		// Set unix timestamp if not exist
 		if reset[key] == 0 {
 			reset[key] = timestamp + cfg.Timeout
+			// Reset hits and resetTime after cfg.Timeout
+			time.AfterFunc(time.Duration(cfg.Timeout)*time.Second, func() {
+				mux.Lock()
+				hits[key] = 0
+				reset[key] = 0
+				mux.Unlock()
+			})
 		}
 		// Get current hits
 		hitCount := hits[key]
