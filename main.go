@@ -83,24 +83,6 @@ func New(config ...Config) func(*fiber.Ctx) {
 			time.Sleep(1 * time.Second)
 		}
 	}()
-	// Reset hits every cfg.Timeout
-	go func() {
-		for {
-			// For every key in reset
-			for key := range reset {
-				// If resetTime exist and current time is equal or bigger
-				if reset[key] != 0 && timestamp >= reset[key] {
-					// Reset hits and resetTime
-					mux.Lock()
-					hits[key] = 0
-					reset[key] = 0
-					mux.Unlock()
-				}
-			}
-			// Wait cfg.Timeout
-			time.Sleep(time.Duration(cfg.Timeout) * time.Second)
-		}
-	}()
 	return func(c *fiber.Ctx) {
 		// Filter request to skip middleware
 		if cfg.Filter != nil && cfg.Filter(c) {
@@ -110,12 +92,16 @@ func New(config ...Config) func(*fiber.Ctx) {
 		// Get key (default is the remote IP)
 		key := cfg.Key(c)
 		mux.Lock()
-		// Increment key hits
-		hits[key]++
 		// Set unix timestamp if not exist
 		if reset[key] == 0 {
 			reset[key] = timestamp + cfg.Timeout
+		} else if timestamp >= reset[key] {
+			hits[key] = 0
+			reset[key] = timestamp + cfg.Timeout
 		}
+
+		// Increment key hits
+		hits[key]++
 		// Get current hits
 		hitCount := hits[key]
 		// Calculate when it resets in seconds
